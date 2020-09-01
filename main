@@ -1,0 +1,25 @@
+import numpy as np #librería en la que se define un tipo de dato que representa matrices multidimensionales
+# además incluye algunas funcionalidades básicas para trabajar con ellas
+
+import os  #libreria para el acceso portable a funciones específicas del sistema operativo
+import cv2 #OpenCV es una biblioteca libre de visión artificial originalmente desarrollada por Intel
+
+from imageshape import imageShape # Se importa la clase imageShape
+
+if __name__ == '__main__':
+    print('Ingrese el alto de la imagen):')
+    alto = int(input())        # se guarda la direccion de la imagen a procesar
+    print('Ingrese el ancho de la imagen):')
+    ancho=int(input())
+
+    imagen = imageShape(ancho, alto)
+    imagen.generateShape()
+    imagen.showShape()
+    img, figure = imagen.getShape()
+    figura=imagen.whatShape(img)
+    print(figura)
+    if figura==figure:
+        print('correcto')
+    else:
+        print('incorrecto')
+        
