@@ -8,18 +8,18 @@ from imageshape import imageShape # Se importa la clase imageShape
 
 if __name__ == '__main__':
     print('Ingrese el alto de la imagen):')
-    alto = int(input())        # se guarda la direccion de la imagen a procesar
+    alto = int(input())        # se guarda el alto de la imagen
     print('Ingrese el ancho de la imagen):')
-    ancho=int(input())
+    ancho=int(input())         # se guarda el ancho de la imagen
 
-    imagen = imageShape(ancho, alto)
-    imagen.generateShape()
-    imagen.showShape()
-    img, figure = imagen.getShape()
-    figura=imagen.whatShape(img)
-    print(figura)
-    if figura==figure:
+    imagen = imageShape(ancho, alto)  # se construye imageShape y se le agregan los valores de entrada
+    imagen.generateShape() # se genera la figura aleatoria en la imagen de tamaño dado
+    imagen.showShape()  # se muestra la imagen generada
+    img, figure = imagen.getShape()  # se obtiene la imagen y el tipo de figura que se genero
+    figura=imagen.whatShape(img)     # se analiza que tipo de figura es la imagen 
+    print(figura)                    # se imprime el tipo de figura obtenido en el análisis
+    
+    if figura==figure:       # se pregunta y se muestra si el analisis fue correcto
         print('correcto')
     else:
         print('incorrecto')
-        
