@@ -2,91 +2,136 @@ import numpy as np #librería en la que se define un tipo de dato que representa
 # además incluye algunas funcionalidades básicas para trabajar con ellas
 
 import cv2 #OpenCV es una biblioteca libre de visión artificial originalmente desarrollada por Intel
-import math
+import math # se importa la biblioteca math
 
 class imageShape:
 
     def __init__(self, width, height):
-        img_z = np.zeros((height, width, 3), np.uint8)
-        self.width = width      #Se guarda la imagen en self
+        img_z = np.zeros((height, width, 3), np.uint8) # se crea una matriz de ceros con el tamaño de la imagen
+        
+        # se crean los self para guardar las propiedades de la imagen
+        self.width = width      
         self.height = height
         self.img=img_z
         self.figur='a'
-    def generateShape(self):   # método para obtener alto y ancho de la imagen
+        
+    def generateShape(self):   # método para generar la figura en la imagen
+        
+        # se obtiene el alto y el ancho de la imagen 
         width=self.width
         height=self.height
-        figura=np.random.randint(4)
-        img_z = np.zeros((height, width, 3), np.uint8)
-        centro = [round(width / 2), round(height / 2)]
-        if figura == 0:
+        
+        figura=np.random.randint(4) # se obtiene de manera aleatoria uniforme el valor de la figura 
+        img_z = np.zeros((height, width, 3), np.uint8) # se crea una matriz de ceros con el tamaño de la imagen
+        centro = [round(width / 2), round(height / 2)] # se encuentra el centro de la imagen
+        
+        
+        if figura == 0: # figura triangulo
+            # ser obtiene el lado, alto y vertices respectivamente del triangulo
             lado = min(height, width) / 2
             h = math.sqrt((lado ** 2) - ((lado / 2) ** 2))
             v1 = [centro[0], centro[1] - round(h / 2)]
             v2 = [centro[0] - round(lado / 2), centro[1] + round(h / 2)]
             v3 = [centro[0] + round(lado / 2), centro[1] + round(h / 2)]
+            
+            #se rellena un poligono uniendo los tres puntos dados
             pts = np.array([v1, v2, v3])
             img = cv2.fillPoly(img_z, pts=[pts], color=(246, 176, 0))
+            #se guarda el tipo de figura creada
             figur='triangulo'
-        elif figura == 1:
-
+            
+        elif figura == 1: # figura cuadrado 
+            # se obtiene el lado, diagonal y vertices respectivamente del cuadrado 
+            #rotado 45 °
             lado = min(height, width) / 2.08
             diagonal = math.sqrt(((2 * lado) ** 2))
             v1 = [centro[0], centro[1] - round(diagonal / 2)]
             v2 = [centro[0] - round(diagonal / 2), centro[1]]
             v3 = [centro[0] + round(diagonal / 2), centro[1]]
             v4 = [centro[0], centro[1] + round(diagonal / 2)]
+            
+            # se rellena el poligono con los puntos dados en el orden correcto para obtener un  cuadrado
             pts = np.array([v1, v2, v4, v3])
             img = cv2.fillPoly(img_z, pts=[pts], color=(246, 176, 0))
             figur = 'cuadrado'
-        elif figura == 2:
+            
+        elif figura == 2: # figura rectangulo
+            
+            # se obtiene ek alto, ancho, vertice superior izquierdo y vertice inferior derecho respectivamente 
             alto = (height / 2)
             ancho = (width / 2)
             v1 = ((centro[0] - round(ancho / 2)), (centro[1] - round(alto / 2)))
             v2 = ((centro[0] + round(ancho / 2)), (centro[1] + round(alto / 2)))
+            # se crea el rectangulo con los vertices hallados anteriormente
             img = cv2.rectangle(img_z, v1, v2, (246, 176, 0), -1)
-            figur = 'rectangulo'
-        elif figura == 3:
+            
+            # si el alto y el ancho es igual se convierte en un cuadrado
+            if (height==width):
+                figur = 'cuadrado'
+            else:
+                figur = 'rectangulo'
+            
+        elif figura == 3: # figura circulo
+            # se obtiene el radio del circulo
             radio = round(min(height, width) / 4)
+            # se dibuja el circulo teniendo el centro y el radio de este
             img = cv2.circle(img_z, (centro[0], centro[1]), radio, (246, 176, 0), -1)
             figur = 'circulo'
+        # se guardan los valores de imagen y tipo de poligono
         self.img=img
         self.figur=figur
 
-    def showShape(self):
+    def showShape(self): # metodo para mostrar el poligono 
+        
+        # se muestra por 5 segundos el poligono generado
         cv2.imshow("Image",self.img)
         cv2.waitKey(5000)
 
-    def getShape(self):
-
+    def getShape(self): # develve la imagen con el poligono y el tipo de poligono
+        
         return self.img , self.figur
 
     def whatShape(self,img):
+        
+        # se transforma a escala de grises la imagen de entrada
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
+        
+        # se umbraliza la imagen en escala de grises 
         ret, Ibw_shapes = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
+
+        # se erosiona y dilata la imagen umbralizada 
         W = 1
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2 * W + 1, 2 * W + 1))
         mask_eroded = cv2.morphologyEx(Ibw_shapes, cv2.MORPH_OPEN, kernel)
         W = 5
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2 * W + 1, 2 * W + 1))
         mask_dilated = cv2.morphologyEx(mask_eroded, cv2.MORPH_CLOSE, kernel)
-
+        
+        # se obtiene el contorno de la imagen que resulto de la dilatacion anterior
         contours, hierarchy = cv2.findContours(Ibw_shapes, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-
+        
+        # se obtienen el numero de vertices que tiene el poligono aproximado del contorno creado anteriormente
         epsilon = 0.01 * cv2.arcLength(contours[0], True)
         approx = cv2.approxPolyDP(contours[0], epsilon, True)
         x, y, w, h = cv2.boundingRect(approx)
+        
+        # dependiendo del numero de vertices se clasifica el poligono
         if len(approx) == 3:
             figur = 'triangulo'
+        
         elif len(approx) == 4:
-            relacion = float(w) / h
-
+            relacion = float(w) / h # se obtiene la relacion entre el alto y el ancho del poligono aproximado
+            
+            # sabiendo que un cuadrado tiene una relacion de 1 se clasifica entre cuadrado y rectangulo
             if (relacion >= 0.9) & (relacion <= 1.1):
                 figur = 'cuadrado'
             else:
                 figur = 'rectangulo'
+        
+        # se hace el estimado que si el pligono posee mayor a 12 vertices puede ser clasificado como un circulo
         elif len(approx) >= 12:
             figur = 'circulo'
-
+        
+        # se retorna el nombre del poligono clasificado
         return  figur
